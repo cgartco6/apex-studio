@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apex Digital · AI Creative Studios</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0b0b0b;
+            color: #e5e5e5;
+            line-height: 1.6;
+        }
+        /* dark grey masked overlay */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(3px);
+            z-index: -1;
+        }
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        header {
+            background: rgba(15, 15, 15, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid #2c2c2c;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+            flex-wrap: wrap;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-circle {
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle at 30% 30%, #5a5a5a, #1e1e1e);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #8a8a8a;
+            box-shadow: 0 0 15px #3d3d3d;
+        }
+        .logo-circle span {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ddd;
+            letter-spacing: -2px;
+        }
+        .logo h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            background: linear-gradient(145deg, #e0e0e0, #9a9a9a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            color: #ccc;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.4rem 0.8rem;
+            border-radius: 30px;
+            transition: all 0.2s;
+        }
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: #2f2f2f;
+            color: white;
+        }
+        .btn {
+            background: #2c2c2c;
+            border: 1px solid #555;
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-block;
+            font-size: 0.95rem;
+        }
+        .btn-primary {
+            background: #3d3d3d;
+            border-color: #8a8a8a;
+        }
+        .btn-primary:hover {
+            background: #525252;
+        }
+        /* hero with masked photo */
+        .hero {
+            position: relative;
+            min-height: 70vh;
+            display: flex;
+            align-items: center;
+            margin: 2rem 0 4rem;
+            border-radius: 50px;
+            overflow: hidden;
+            background: url('https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=1974&auto=format&fit=crop') center/cover no-repeat;
+            box-shadow: 0 30px 40px -20px black;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: brightness(0.6);
+            z-index: 1;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 700px;
+            padding: 4rem 3rem;
+            color: white;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+        .hero-content h2 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .hero-content p {
+            font-size: 1.3rem;
+            margin: 1.5rem 0;
+        }
+        /* page sections */
+        .page-section {
+            display: none;
+            padding: 2rem 0 5rem;
+        }
+        .active-section {
+            display: block;
+        }
+        /* cards grid */
+        .grid-3, .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        .card {
+            background: rgba(25, 25, 25, 0.95);
+            backdrop-filter: blur(8px);
+            border: 1px solid #3c3c3c;
+            border-radius: 40px;
+            padding: 2rem;
+            transition: 0.2s;
+            box-shadow: 0 20px 30px -15px black;
+        }
+        .card:hover {
+            transform: translateY(-6px);
+            border-color: #7a7a7a;
+        }
+        .card i {
+            font-size: 2.5rem;
+            color: #b0b0b0;
+            margin-bottom: 1rem;
+        }
+        .badge {
+            background: #2d2d2d;
+            padding: 0.3rem 1rem;
+            border-radius: 30px;
+            display: inline-block;
+            margin: 0.2rem;
+            border: 1px solid #5a5a5a;
+        }
+        .creator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        .creator-card {
+            background: #1e1e1e;
+            border-radius: 30px;
+            padding: 1.5rem;
+            border: 1px solid #3a3a3a;
+            text-align: center;
+        }
+        .creator-card img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 1rem;
+        }
+        /* about page mission/vision */
+        .statement-block {
+            background: #1a1a1a;
+            border-radius: 40px;
+            padding: 2.5rem;
+            margin: 2rem 0;
+            border-left: 6px solid #7a7a7a;
+        }
+        /* cart */
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1e1e1e;
+            border-radius: 30px;
+            padding: 1rem 2rem;
+            margin: 1rem 0;
+        }
+        /* modal */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-content {
+            background: #222;
+            border-radius: 40px;
+            padding: 2.5rem;
+            max-width: 400px;
+            width: 90%;
+            border: 1px solid #5a5a5a;
+        }
+        .modal-content input {
+            width: 100%;
+            padding: 0.8rem;
+            margin: 0.8rem 0;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 30px;
+            color: white;
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: #aaa;
+            font-size: 1.2rem;
+            margin: 0 1rem 1rem 0;
+            cursor: pointer;
+        }
+        .tab-btn.active {
+            color: white;
+            border-bottom: 2px solid #8a8a8a;
+        }
+        footer {
+            background: #0c0c0c;
+            border-top: 1px solid #2a2a2a;
+            padding: 2rem 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-row">
+            <div class="logo">
+                <div class="logo-circle"><span>A</span></div>
+                <h1>APEX DIGITAL</h1>
+            </div>
+            <div class="nav-links">
+                <a href="#" data-section="home" class="nav-link active">Home</a>
+                <a href="#" data-section="about" class="nav-link">About</a>
+                <a href="#" data-section="design" class="nav-link">Design</a>
+                <a href="#" data-section="branding" class="nav-link">Branding</a>
+                <a href="#" data-section="marketing" class="nav-link">Marketing</a>
+                <a href="#" data-section="shop" class="nav-link">Shop</a>
+                <a href="#" data-section="cart" class="nav-link"><i class="fas fa-shopping-cart"></i> <span id="cart-count">0</span></a>
+                <button class="btn" id="loginBtn"><i class="fas fa-user"></i> Login / Register</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- HOME page -->
+        <section id="home" class="page-section active-section">
+            <div class="hero">
+                <div class="hero-content">
+                    <h2>AI-Powered Creative Studios</h2>
+                    <p>We combine human creativity with advanced AI to deliver stunning design, branding, and marketing solutions.</p>
+                    <button class="btn btn-primary" onclick="document.querySelector('[data-section=design]').click()">Explore Studios</button>
+                </div>
+            </div>
+
+            <h2 style="font-size: 2.5rem; margin: 3rem 0 1rem;">What we do</h2>
+            <div class="grid-3">
+                <div class="card">
+                    <i class="fas fa-paint-brush"></i>
+                    <h3>Design Studio</h3>
+                    <p>From classic to futuristic – AI generates HD visuals, logos, UI/UX. Real creators refine.</p>
+                    <a href="#" data-section="design" class="btn">Learn more →</a>
+                </div>
+                <div class="card">
+                    <i class="fas fa-tag"></i>
+                    <h3>Branding Studio</h3>
+                    <p>Strategic identity, voice, and visual language. AI-powered brand strategy.</p>
+                    <a href="#" data-section="branding" class="btn">Learn more →</a>
+                </div>
+                <div class="card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Marketing Studio</h3>
+                    <p>AI marketing engine: ad generation, landing pages, scheduler, autoposter.</p>
+                    <a href="#" data-section="marketing" class="btn">Learn more →</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABOUT page with mission, vision, statement -->
+        <section id="about" class="page-section">
+            <h2>About Apex Digital</h2>
+            <div class="statement-block">
+                <h3>Our Mission</h3>
+                <p>To democratize world-class creative services by combining human artistry with artificial intelligence, making professional design, branding, and marketing accessible to every business.</p>
+            </div>
+            <div class="statement-block">
+                <h3>Our Vision</h3>
+                <p>A future where any brand, regardless of size, can instantly generate and execute a complete creative strategy – from logo to campaign – with AI as a collaborative partner.</p>
+            </div>
+            <div class="statement-block">
+                <h3>Our Statement</h3>
+                <p>We believe technology should amplify creativity, not replace it. Apex Digital is built by creators for creators, ensuring that every output is both innovative and human‑centered.</p>
+            </div>
+        </section>
+
+        <!-- DESIGN STUDIO page -->
+        <section id="design" class="page-section">
+            <h2>🎨 Design Studio</h2>
+            <p><span class="badge">classic</span><span class="badge">cartoon</span><span class="badge">traditional</span><span class="badge">modern</span><span class="badge">trending</span><span class="badge">futuristic</span></p>
+            <div style="background: #1e1e1e; border-radius: 40px; padding: 2rem; margin: 2rem 0;">
+                <h3>Real HD designs, exactly what you want</h3>
+                <p>Our lead designers: <strong>Zinhle Dlamini</strong> (futuristic), <strong>Keagan Fourie</strong> (cartoon/modern), <strong>Nadia Jansen</strong> (traditional). They collaborate with AI to deliver stunning visuals.</p>
+                <button class="btn btn-primary" id="generateDesignBtn">✨ Generate a futuristic logo (AI)</button>
+                <div id="aiDesignResult" style="margin-top:2rem;"></div>
+            </div>
+            <div class="creator-grid">
+                <div class="creator-card"><i class="fas fa-user-circle" style="font-size:3rem;"></i><h4>Zinhle Dlamini</h4><p>Futuristic & 3D</p></div>
+                <div class="creator-card"><i class="fas fa-user-circle" style="font-size:3rem;"></i><h4>Keagan Fourie</h4><p>Cartoon, Modern</p></div>
+                <div class="creator-card"><i class="fas fa-user-circle" style="font-size:3rem;"></i><h4>Nadia Jansen</h4><p>Traditional, Classic</p></div>
+            </div>
+        </section>
+
+        <!-- BRANDING STUDIO page -->
+        <section id="branding" class="page-section">
+            <h2>🏷️ Branding Studio</h2>
+            <div class="grid-3">
+                <div class="card">
+                    <i class="fas fa-brain"></i>
+                    <h3>AI Brand Strategist</h3>
+                    <p>Input your values, audience – AI generates brand archetype, voice, and messaging framework.</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-pen-fancy"></i>
+                    <h3>Visual Identity Generator</h3>
+                    <p>Logos, color palettes, typography – in any style from classic to out-of-the-box.</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-file-signature"></i>
+                    <h3>Tone & Messaging</h3>
+                    <p>AI creates brand voice guidelines and sample copy for all channels.</p>
+                </div>
+            </div>
+            <h3 style="margin-top:3rem;">Real Branding Creators</h3>
+            <div class="creator-grid">
+                <div class="creator-card"><i class="fas fa-user-tie"></i> <strong>Lerato Mokoena</strong> – ex-Y&R strategist</div>
+                <div class="creator-card"><i class="fas fa-paint-brush"></i> <strong>Thabo Ndlovu</strong> – visual identity</div>
+                <div class="creator-card"><i class="fas fa-feather"></i> <strong>Fatima Cassim</strong> – naming & tone</div>
+            </div>
+        </section>
+
+        <!-- MARKETING STUDIO page with engine -->
+        <section id="marketing" class="page-section">
+            <h2>📈 Marketing Studio</h2>
+            <div style="background:#1a1a1a; border-radius:40px; padding:2rem;">
+                <h3><i class="fas fa-microchip"></i> AI Marketing Engine</h3>
+                <p>Generate ad creatives, landing pages, and social posts in one click. Schedule and auto-post across platforms.</p>
+                <div style="display: flex; gap:1rem; flex-wrap:wrap; margin:1.5rem 0;">
+                    <span class="badge"><i class="fas fa-calendar-alt"></i> Scheduler active</span>
+                    <span class="badge"><i class="fas fa-share-alt"></i> Autoposter: FB/IG/TikTok</span>
+                    <span class="badge"><i class="fas fa-chart-bar"></i> Analytics</span>
+                </div>
+                <button class="btn btn-primary" id="generateAdBtn">Generate a Facebook ad</button>
+                <div id="adResult" style="margin-top:1rem;"></div>
+            </div>
+            <h3 style="margin-top:2rem;">Real Marketing Creators</h3>
+            <div class="creator-grid">
+                <div class="creator-card"><i class="fas fa-video"></i> <strong>Yumna Parker</strong> – video ads</div>
+                <div class="creator-card"><i class="fas fa-file-alt"></i> <strong>Ryan Mthethwa</strong> – landing page copy</div>
+                <div class="creator-card"><i class="fas fa-podcast"></i> <strong>Chloe van Wyk</strong> – social audio</div>
+            </div>
+        </section>
+
+        <!-- SHOP page -->
+        <section id="shop" class="page-section">
+            <h2>Shop Design Assets</h2>
+            <div id="product-list" class="grid-4"></div>
+        </section>
+
+        <!-- CART / CHECKOUT page -->
+        <section id="cart" class="page-section">
+            <h2>Your Cart</h2>
+            <div id="cart-items"></div>
+            <div style="text-align:right; margin:2rem 0;">
+                <h3>Total: R<span id="cart-total">0.00</span></h3>
+                <button class="btn btn-primary" id="checkoutBtn">Proceed to Checkout</button>
+            </div>
+            <div id="checkout-form" style="display:none; background:#1a1a1a; border-radius:40px; padding:2rem;">
+                <h3>Checkout (South Africa)</h3>
+                <p>Pay via PayFast / EFT / PayShap</p>
+                <button class="btn" id="mockPayBtn">Simulate Payment</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Login/Register Modal (one form) -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                <button class="tab-btn active" id="loginTab">Login</button>
+                <button class="tab-btn" id="registerTab">Register</button>
+            </div>
+            <div id="loginForm">
+                <input type="email" placeholder="Email" id="loginEmail">
+                <input type="password" placeholder="Password" id="loginPassword">
+                <button class="btn btn-primary" id="loginSubmit">Login</button>
+            </div>
+            <div id="registerForm" style="display:none;">
+                <input type="text" placeholder="Full Name">
+                <input type="email" placeholder="Email">
+                <input type="password" placeholder="Password">
+                <button class="btn btn-primary" id="registerSubmit">Register</button>
+            </div>
+            <button class="btn" id="closeModal" style="margin-top:1rem;">Close</button>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>© 2025 Apex Digital – AI Creative Studios. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // ---------- PRODUCTS & CART ----------
+        const products = [
+            { id: 1, name: 'Classic Logo Package', price: 899, image: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&h=400&fit=crop' },
+            { id: 2, name: 'Brand Identity Kit', price: 2499, image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&h=400&fit=crop' },
+            { id: 3, name: 'Futuristic UI Design', price: 3999, image: 'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=600&h=400&fit=crop' },
+            { id: 4, name: 'Social Media Ad Pack', price: 1599, image: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600&h=400&fit=crop' }
+        ];
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        function saveCart() {
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartCount();
+            renderCart();
+  
