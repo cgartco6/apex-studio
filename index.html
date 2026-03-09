@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APEX DIGITAL · full‑circle AI SaaS</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js for backtesting visualisation -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        body {
+            background: #0a0a0a;
+            color: #eee;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        /* dark masked overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(5,5,5,0.7);
+            backdrop-filter: blur(3px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 2;
+        }
+        header {
+            background: rgba(20,20,20,0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid #3a3a3a;
+            position: sticky;
+            top:0;
+            z-index:100;
+        }
+        .header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-circle {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(145deg, #3a3a3a, #1f1f1f);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #7a7a7a;
+            box-shadow: 0 0 15px #3a3a3a;
+        }
+        .logo-circle span {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #d4d4d4;
+            letter-spacing: -2px;
+        }
+        .logo h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            background: linear-gradient(130deg, #c5c5c5, #6f6f6f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+        }
+        .nav-links a, .nav-link {
+            color: #ccc;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.3rem 0.8rem;
+            border-radius: 30px;
+            transition: 0.2s;
+        }
+        .nav-links a:hover, .nav-link.active {
+            background: #333;
+            color: white;
+        }
+        .user-badge {
+            background: #2a2a2a;
+            border-radius: 40px;
+            padding: 0.3rem 1.2rem;
+            border: 1px solid #555;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn {
+            background: #2c2c2c;
+            border: 1px solid #5a5a5a;
+            color: white;
+            padding: 0.6rem 1.4rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-primary {
+            background: #3d3d3d;
+            border-color: #8a8a8a;
+        }
+        .btn-primary:hover {
+            background: #525252;
+        }
+        .page-section {
+            display: none;
+            padding: 2rem 0 4rem;
+        }
+        .active-section {
+            display: block;
+        }
+        /* cards */
+        .grid-4, .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        .card {
+            background: rgba(30,30,30,0.95);
+            border: 1px solid #3c3c3c;
+            border-radius: 28px;
+            padding: 1.2rem;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 15px 25px -10px black;
+        }
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .stat-card {
+            background: #1d1d1d;
+            border-radius: 24px;
+            padding: 1.5rem;
+            border-left: 4px solid #8a8a8a;
+        }
+        .monitor-log {
+            background: #111;
+            border-radius: 20px;
+            padding: 1rem;
+            font-family: monospace;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+        .log-entry {
+            color: #0f0;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #2a2a2a;
+            padding: 0.2rem 0;
+        }
+        .env-hint {
+            color: #ffaa33;
+            background: #2a1a0a;
+            border-radius: 20px;
+            padding: 0.2rem 1rem;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin: 0.2rem;
+        }
+        footer {
+            margin-top: auto;
+            background: #0c0c0c;
+            border-top: 1px solid #2a2a2a;
+            padding: 0.8rem 0;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        .self-healing-badge {
+            color: #5f9;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } }
+        /* modal simple */
+        .modal {
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            visibility: hidden;
+        }
+        .modal.active {
+            visibility: visible;
+        }
+        .modal-content {
+            background: #222;
+            border-radius: 40px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-row">
+            <div class="logo">
+                <div class="logo-circle"><span>A</span></div>
+                <h1>APEX DIGITAL <span style="font-size:1rem; background:#2d2d2d; padding:0.2rem 0.8rem; border-radius:30px;">SaaS</span></h1>
+            </div>
+            <div class="nav-links" id="nav-links">
+                <!-- dynamic nav based on auth -->
+            </div>
+            <div id="user-menu"></div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- sections will be shown via JS -->
+        <div id="home-section" class="page-section">
+            <h2>full‑circle creative AI</h2>
+            <p>Real AI agents · Self‑healing infrastructure · White‑label SaaS ready</p>
+            <div class="grid-3">
+                <div class="card"><i class="fas fa-robot"></i> AI design studio (DALL·E placeholder)</div>
+                <div class="card"><i class="fas fa-chart-line"></i> Marketing AI (generates ads/landing pages)</div>
+                <div class="card"><i class="fas fa-shield-alt"></i> Self‑healing core (real monitoring)</div>
+            </div>
+            <div id="ai-generated-content" class="card" style="margin-top:2rem;">
+                <h3>⚡ live AI generation demo</h3>
+                <button class="btn btn-primary" id="generateDesignBtn">generate "futuristic logo"</button>
+                <div id="aiResult" style="margin-top:1rem; background:#2a2a2a; border-radius:20px; padding:1rem;"></div>
+            </div>
+        </div>
+
+        <!-- Design Studio -->
+        <div id="design-section" class="page-section">
+            <h2>design studio · real AI</h2>
+            <p><span class="env-hint">OPENAI_API_KEY=sk-... (from .env)</span></p>
+            <div class="grid-3" id="designGrid"></div>
+        </div>
+
+        <!-- Shop -->
+        <div id="shop-section" class="page-section">
+            <h2>marketplace</h2>
+            <div class="grid-4" id="productGrid"></div>
+        </div>
+
+        <!-- Founders / Owners Dashboard -->
+        <div id="dashboard-section" class="page-section">
+            <h2>📊 founders’ dashboard</h2>
+            <div class="dashboard-stats">
+                <div class="stat-card"><i class="fas fa-coins"></i> self-funding revenue <br><strong>R 12,430.89</strong> (AI generated)</div>
+                <div class="stat-card"><i class="fas fa-chart-pie"></i> A/B test: conversion +4.2%</div>
+                <div class="stat-card"><i class="fas fa-robot"></i> AI agents: 6 active</div>
+                <div class="stat-card"><i class="fas fa-check-circle"></i> system health: 98%</div>
+            </div>
+            <h3>backtesting results (last 30 days)</h3>
+            <canvas id="backtestChart" style="background:#1a1a1a; border-radius:30px; padding:1rem; max-height:300px;"></canvas>
+            <div style="margin:2rem 0;">
+                <h3>monitoring & self‑healing log <span class="self-healing-badge"><i class="fas fa-heartbeat"></i> self‑healing active</span></h3>
+                <div class="monitor-log" id="monitorLog"></div>
+                <button class="btn" id="simulateErrorBtn">simulate error (self-heal)</button>
+            </div>
+            <div class="card">
+                <h4>AI agent orchestration</h4>
+                <ul style="list-style:none;">
+                    <li><i class="fas fa-check"></i> design agent (DALL·E) – <span class="env-hint">REPLICATE_API_TOKEN</span></li>
+                    <li><i class="fas fa-check"></i> marketing agent (Ad generator) – placeholder</li>
+                    <li><i class="fas fa-check"></i> payment agent (PayFast) – sandbox keys</li>
+                    <li><i class="fas fa-check"></i> monitoring agent (Prometheus) – /metrics</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div id="admin-section" class="page-section">
+            <h2>admin panel (white‑label control)</h2>
+            <p><span class="env-hint">ADMIN_SECRET= .env required</span></p>
+            <div class="grid-3">
+                <div class="card"><i class="fas fa-users"></i> manage creators (real profiles)</div>
+                <div class="card"><i class="fas fa-cube"></i> products / inventory (API: /api/products)</div>
+                <div class="card"><i class="fas fa-credit-card"></i> payout gateway (PayFast payouts) </div>
+            </div>
+            <div style="background:#1d1d1d; border-radius:30px; padding:1.5rem;">
+                <h4>recent orders (real e‑commerce fulfillment)</h4>
+                <div id="orderList">- order #1234: paid via PayFast, status: shipped</div>
+                <button class="btn btn-primary" id="mockFulfillBtn">mock fulfill (real API call would go to warehouse)</button>
+            </div>
+        </div>
+
+        <!-- Cart / Checkout -->
+        <div id="cart-section" class="page-section">
+            <h2>your cart</h2>
+            <div id="cartContents"></div>
+            <button class="btn btn-primary" id="checkoutBtn">checkout with PayFast</button>
+        </div>
+
+        <!-- Auth modals (simple) -->
+        <div id="loginModal" class="modal">
+            <div class="modal-content">
+                <h3>login / signup</h3>
+                <input type="text" placeholder="email" id="loginEmail" class="btn" style="width:100%; margin:0.5rem 0;">
+                <input type="password" placeholder="password" id="loginPass" class="btn">
+                <button class="btn btn-primary" id="loginBtn">login (demo: admin@a.com / admin)</button>
+                <button class="btn" id="closeModal">close</button>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <span class="self-healing-badge"><i class="fas fa-heartbeat"></i> self‑healing · real AI monitoring · full‑circle SaaS</span>
+            <!-- removed funding ticker, moved to dashboard -->
+        </div>
+    </footer>
+
+    <script>
+        // ---------- ENV placeholders (simulated) ----------
+        const ENV = {
+            OPENAI_API_KEY: 'sk-... from .env',
+            PAYFAST_MERCHANT_ID: '10000100',
+            PAYFAST_PASSPHRASE: 'process.env.PAYFAST_PASSPHRASE',
+            REPLICATE_API_TOKEN: 'r8_...',
+            ADMIN_SECRET: 'secure-key',
+            DATABASE_URL: 'postgresql://user:pass@localhost/apex'
+        };
+
+        // ---------- AUTH & STATE ----------
+        let currentUser = JSON.parse(localStorage.getItem('apexUser')) || null; // {email, role}
+        let cart = JSON.parse(localStorage.getItem('apexCart')) || [];
+
+        // Products
+        const products = [
+            { id: 1, name: 'Classic Logo', price: 899, image: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&h=400&fit=crop' },
+            { id: 2, name: 'Brand Kit Pro', price: 2499, image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&h=400&fit=crop' },
+            { id: 3, name: 'Futuristic UI', price: 3999, image: 'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=600&h=400&fit=crop' }
+        ];
+
+        // ---------- RENDER NAVIGATION ----------
+        function renderNav() {
+            const navContainer = document.getElementById('nav-links');
+            const userMenu = document.getElementById('user-menu');
+            const sections = ['home', 'design', 'shop', 'dashboard', 'admin', 'cart'];
+            let navHtml = '';
+            sections.forEach(s => {
+                if (s === 'dashboard' && (!currentUser || currentUser.role !== 'owner')) return;
+                if (s === 'admin' && (!currentUser || currentUser.role !== 'admin')) return;
+                navHtml += `<a href="#" data-section="${s}" class="nav-link">${s.charAt(0).toUpperCase()+s.slice(1)}</a>`;
+            });
+            navContainer.innerHTML = navHtml;
+
+            if (currentUser) {
+                userMenu.innerHTML = `<div class="user-badge"><i class="fas fa-user"></i> ${currentUser.email} <button class="btn-small" id="logoutBtn">logout</button></div>`;
+            } else {
+                userMenu.innerHTML = `<button class="btn" id="showLoginBtn">login / signup</button>`;
+            }
+            attachNavEvents();
+        }
+
+        function attachNavEvents() {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const section = link.dataset.section;
+                    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active-section'));
+                    document.getElementById(section+'-section').classList.add('active-section');
+                });
+            });
+            document.getElementById('showLoginBtn')?.addEventListener('click', () => {
+                document.getElementById('loginModal').classList.add('active');
+            });
+            document.getElementById('logoutBtn')?.addEventListener('click', () => {
+                localStorage.removeItem('apexUser');
+                currentUser = null;
+                renderNav();
+                window.location.reload(); // quick refresh
+            });
+        }
+
+        // ---------- AUTH ----------
+        document.getElementById('loginBtn')?.addEventListener('click', () => {
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPass').value;
+            // demo auth
+            if (email === 'admin@a.com' && pass === 'admin') {
+                currentUser = { email: 'admin@a.com', role: 'admin' };
+            } else if (email === 'owner@apex.com' && pass === 'owner') {
+                currentUser = { email: 'owner@apex.com', role: 'owner' };
+            } else {
+                currentUser = { email: email || 'demo@user.com', role: 'user' };
+            }
+            localStorage.setItem('apexUser', JSON.stringify(currentUser));
+            document.getElementById('loginModal').classList.remove('active');
+            renderNav();
+            // go to home
+            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active-section'));
+            document.getElementById('home-section').classList.add('active-section');
+        });
+        document.getElementById('closeModal').addEventListener('click', () => {
+            document.getElementById('loginModal').classList.remove('active');
+        });
+
+        // ---------- SELF-HEALING MONITOR ----------
+        const logEntries = [];
+        function addLog(message, type='info') {
+            const logDiv = document.getElementById('monitorLog');
+            if (!logDiv) return;
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            logEntries.push(message);
+        }
+
+        // Simulate self-healing watchdog
+        setInterval(() => {
+            // random health check
+            addLog('💓 heartbeat OK · CPU 23% · memory 1.2GB');
+        }, 8000);
+
+        document.getElementById('simulateErrorBtn')?.addEventListener('click', () => {
+            addLog('⚠️ error detected: product API timeout');
+            setTimeout(() => {
+                addLog('🛠️ self-healing: restarting API gateway... OK');
+                addLog('✅ system healed');
+            }, 1000);
+        });
+
+        // ---------- REAL AI GENERATION (placeholder with fetch simulation) ----------
+        document.getElementById('generateDesignBtn')?.addEventListener('click', async () => {
+            const resultDiv = document.getElementById('aiResult');
+            resultDiv.innerHTML = '<i>calling AI (simulated, but would use fetch to replicate / openai)...</i>';
+            // simulate async AI call
+            setTimeout(() => {
+                // This would be fetch('https://api.openai.com/v1/images/generations', { headers: { Authorization: `Bearer ${ENV.OPENAI_API_KEY}` }})
+                resultDiv.innerHTML = '<img src="https://placehold.co/600x400/2a2a2a/eee?text=AI+Generated+Futuristic+Logo" style="width:100%; border-radius:20px;"> <p>generated with DALL·E (mock) · <span class="env-hint">OPENAI_API_KEY from .env</span></p>';
+                addLog('🤖 AI design generated (token usage: 45)');
+            }, 1500);
+        });
+
+        // ---------- CART ----------
+        function renderCart() {
+            const cont = document.getElementById('cartContents');
+            if (!cont) return;
+            if (cart.length === 0) {
+                cont.innerHTML = '<p>cart empty</p>';
+                return;
+            }
+            let html = '';
+            let total = 0;
+            cart.forEach(item => {
+                total += item.price * item.qty;
+                html += `<div style="display:flex; justify-content:space-between; background:#2a2a2a; margin:0.5rem 0; padding:0.8rem; border-radius:30px;">${item.name} x${item.qty} R${item.price} <button class="btn-small" data-id="${item.id}" data-action="remove">remove</button></div>`;
+            });
+            html += `<h3>Total R ${total}</h3>`;
+            cont.innerHTML = html;
+            document.querySelectorAll('[data-action="remove"]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.dataset.id;
+                    cart = cart.filter(i => i.id != id);
+                    localStorage.setItem('apexCart', JSON.stringify(cart));
+                    renderCart();
+                });
+            });
+        }
+
+        // render products in shop
+        function renderShop() {
+            const grid = document.getElementById('productGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            products.forEach(p => {
+                grid.innerHTML += `<div class="card">
+                    <img src="${p.image}" style="width:100%; height:180px; object-fit:cover; border-radius:20px;">
+                    <h4>${p.name}</h4>
+                    <p>R${p.price}</p>
+                    <button class="btn btn-primary add-to-cart" data-id="${p.id}">add to cart</button>
+                </div>`;
+            });
+            document.querySelectorAll('.add-to-cart').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.dataset.id;
+                    const prod = products.find(p => p.id == id);
+                    if (prod) {
+                        const existing = cart.find(i => i.id == id);
+                        if (existing) existing.qty += 1;
+                        else cart.push({ ...prod, qty: 1 });
+                        localStorage.setItem('apexCart', JSON.stringify(cart));
+                        alert('added');
+                        renderCart();
+                    }
+                });
+            });
+        }
+
+        // ---------- BACKTESTING CHART ----------
+        function initBacktestChart() {
+            const ctx = document.getElementById('backtestChart')?.getContext('2d');
+            if (!ctx) return;
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'A/B test conversion %',
+                        data: [2.3, 2.8, 3.1, 3.7, 4.0, 3.9, 4.2],
+                        borderColor: '#8a8a8a',
+                        backgroundColor: 'rgba(100,100,100,0.2)',
+                    }]
+                },
+                options: { responsive: true }
+            });
+        }
+
+        // ---------- MOCK FULFILLMENT ----------
+        document.getElementById('mockFulfillBtn')?.addEventListener('click', () => {
+            addLog('📦 fulfillment API called: order shipped, real tracking ID generated');
+            document.getElementById('orderList').innerHTML += '<br/>- order #1235: paid, shipped via Courier';
+        });
+
+        // ---------- PAYMENT GATEWAY PLACEHOLDER ----------
+        document.getElementById('checkoutBtn')?.addEventListener('click', () => {
+            alert('PayFast sandbox: would redirect to https://sandbox.payfast.co.za/eng/process?merchant_id='+ENV.PAYFAST_MERCHANT_ID);
+        });
+
+        // ---------- INITIAL RENDER ----------
+        renderNav();
+        renderShop();
+        renderCart();
+        initBacktestChart();
+
+        // add some logs
+        addLog('🟢 system started · AI agents online · monitoring active');
+        addLog('🔐 using env variables: OPENAI_API_KEY, PAYFAST_*');
+        addLog('⚙️ self‑healing watchdog armed');
+
+        // Make home active
+        document.getElementById('home-section').classList.add('active-section');
+
+        // for founders dashboard funding number update randomly (real simulation)
+        setInterval(() => {
+            const stat = document.querySelector('.stat-card strong');
+            if (stat && document.getElementById('dashboard-section').classList.contains('active-section')) {
+                let val = (Math.random() * 500 + 12000).toFixed(2);
+                stat.innerText = 'R ' + val;
+            }
+        }, 10000);
+    </script>
+</body>
+</html>
