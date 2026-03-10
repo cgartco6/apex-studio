@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>NovaMarket · BTC dominance · gainers & losers</title>
+    <!-- Font Awesome 6 (free) for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* RESET & GLOBAL */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #f4f7fc;
+            color: #0b1a2f;
+            padding: 1rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        /* smooth scroll + responsive base */
+        html { scroll-behavior: smooth; }
+
+        /* main container */
+        .dashboard {
+            max-width: 1440px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* header with bitcoin dominance hero */
+        .header-card {
+            background: linear-gradient(145deg, #0f212e, #1a2c3b);
+            color: white;
+            border-radius: 2rem;
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.8rem;
+            box-shadow: 0 20px 30px -10px rgba(0,20,40,0.3);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo-area h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .logo-area h1 i { color: #f0b90b; }
+        .btc-dominance {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(8px);
+            padding: 1rem 2rem;
+            border-radius: 3rem;
+            border: 1px solid rgba(255,255,255,0.15);
+            text-align: center;
+        }
+        .dom-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.7;
+        }
+        .dom-value {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1.2;
+            color: #ffd966;
+        }
+        .dom-value small { font-size: 1.2rem; font-weight: 400; color: #aaa; }
+
+        /* scroller / ticker (forex, crypto, commodities, indices) */
+        .ticker-wrapper {
+            background: white;
+            border-radius: 60px;
+            padding: 0.7rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.02);
+            border: 1px solid #e9ecf0;
+        }
+        .ticker-scroll {
+            display: flex;
+            overflow-x: auto;
+            gap: 2rem;
+            padding: 0 1.5rem;
+            white-space: nowrap;
+            scrollbar-width: thin;
+            scrollbar-color: #b0c4de #eef2f6;
+            -webkit-overflow-scrolling: touch;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        .ticker-scroll::-webkit-scrollbar { height: 5px; }
+        .ticker-scroll::-webkit-scrollbar-thumb { background: #b0c4de; border-radius: 12px; }
+        .ticker-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.4rem 0;
+            border-bottom: 2px solid transparent;
+            transition: 0.1s;
+            flex-shrink: 0;
+        }
+        .ticker-symbol { font-weight: 600; color: #1f3a5f; }
+        .ticker-price { color: #2d4059; }
+        .ticker-change { font-weight: 600; }
+        .positive { color: #1e7e34; }
+        .negative { color: #b11d2a; }
+        .ticker-sector { 
+            background: #dde3ed; 
+            padding: 0.2rem 0.8rem; 
+            border-radius: 30px; 
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #1e2f41;
+            text-transform: uppercase;
+        }
+
+        /* main grid: gainers / losers + strong signal */
+        .grid-two {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.8rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 2rem;
+            padding: 1.6rem 1.4rem;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(211, 222, 235, 0.4);
+            backdrop-filter: blur(2px);
+            transition: all 0.2s;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #152b44;
+            border-bottom: 2px solid #eef3f9;
+            padding-bottom: 0.8rem;
+        }
+        .card-header i { font-size: 1.6rem; }
+        .gainers-header i { color: #2e7d32; }
+        .losers-header i { color: #c62828; }
+
+        .table-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+        }
+        .row-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed #e2e9f2;
+        }
+        .row-left { display: flex; align-items: center; gap: 0.7rem; }
+        .rank {
+            width: 24px; height: 24px;
+            background: #eef3f9;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #2c3e5c;
+        }
+        .asset-name {
+            font-weight: 600;
+        }
+        .asset-symbol { color: #5b6f88; font-size: 0.8rem; margin-left: 0.3rem; }
+        .price-info { text-align: right; }
+        .price-main { font-weight: 600; }
+        .change-pct {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .signal-tag {
+            background: #f5f9ff;
+            border-radius: 40px;
+            padding: 0.3rem 1rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            border: 1px solid #cddae9;
+            color: #1e3b5c;
+            margin-left: 0.6rem;
+            white-space: nowrap;
+        }
+        .signal-strong-buy { background: #d0ebd0; color: #0d461d; border-color: #7ab87a; }
+        .signal-strong-sell { background: #ffe2e2; color: #a12323; border-color: #e0a4a4; }
+
+        /* EXTRA ROW: commodities/indices highlight + strong signals */
+        .featured-signals {
+            background: white;
+            border-radius: 2rem;
+            padding: 1.6rem;
+            border: 1px solid #dee7f0;
+            margin-top: 0.5rem;
+        }
+        .signal-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem 2.5rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .signal-pill {
+            background: #f0f4fe;
+            border-radius: 40px;
+            padding: 0.6rem 1.4rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .signal-pill strong { font-weight: 600; }
+        .badge {
+            background: #1f3a5f;
+            color: white;
+            border-radius: 30px;
+            padding: 0.2rem 0.9rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .badge.buy { background: #1b5e3a; }
+        .badge.sell { background: #a12828; }
+
+        .footer-note {
+            margin-top: 2.5rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #7b8ba3;
+            border-top: 1px solid #d9e2ed;
+            padding-top: 1.5rem;
+        }
+        .footer-note a {
+            color: #1f3a5f;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        /* micro responsiveness */
+        @media (max-width: 600px) {
+            .header-card { flex-direction: column; align-items: start; gap: 1rem; }
+            .btc-dominance { width: 100%; }
+            .dom-value { font-size: 2.4rem; }
+            .ticker-item { font-size: 0.8rem; }
+        }
+        /* shiny animation */
+        .blink {
+            animation: softPulse 2.2s infinite;
+        }
+        @keyframes softPulse {
+            0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+
+    <!-- header with bitcoin dominance indicator (interactive simulated) -->
+    <div class="header-card">
+        <div class="logo-area">
+            <h1><i class="fas fa-chart-line"></i> NovaMarket · MVP</h1>
+            <div style="font-size:0.9rem; opacity:0.7; display: flex; gap: 1rem; margin-top: 0.3rem;">
+                <span><i class="fas fa-coin"></i> crypto · fx · commodities</span>
+            </div>
+        </div>
+        <div class="btc-dominance" id="btcDominanceWidget">
+            <div class="dom-label"><i class="fab fa-bitcoin"></i> Bitcoin dominance</div>
+            <div class="dom-value" id="btcDomValue">54.2<small>%</small></div>
+            <div style="font-size:0.8rem; opacity:0.6;">+0.8% this week</div>
+        </div>
+    </div>
+
+    <!-- scroll bar: forex, crypto, commodities, indices (live like) -->
+    <div class="ticker-wrapper">
+        <div class="ticker-scroll" id="tickerTape">
+            <!-- injected via JS, but static fallback inside as well -->
+        </div>
+    </div>
+
+    <!-- Top gainers & Top losers with strong buy/sell signals -->
+    <div class="grid-two">
+        <!-- Gainers card -->
+        <div class="card">
+            <div class="card-header gainers-header">
+                <i class="fas fa-arrow-up"></i> TOP GAINERS
+                <span style="margin-left: auto; font-size:0.7rem; background: #eff3f9; padding:0.3rem 0.9rem; border-radius:30px;"><i class="fas fa-fire"></i> 24h</span>
+            </div>
+            <div class="table-list" id="gainersTable">
+                <!-- dynamic js -->
+            </div>
+            <div style="margin-top: 1rem; font-size:0.75rem; color:#286b4a;"><i class="fas fa-check-circle"></i> Strong buy signals highlighted</div>
+        </div>
+        <!-- Losers card -->
+        <div class="card">
+            <div class="card-header losers-header">
+                <i class="fas fa-arrow-down"></i> TOP LOSERS
+                <span style="margin-left: auto; font-size:0.7rem; background: #eff3f9; padding:0.3rem 0.9rem; border-radius:30px;"><i class="fas fa-chart-line"></i> 24h</span>
+            </div>
+            <div class="table-list" id="losersTable">
+                <!-- dynamic js -->
+            </div>
+            <div style="margin-top: 1rem; font-size:0.75rem; color:#a73c3c;"><i class="fas fa-exclamation-triangle"></i> Strong sell signals shown</div>
+        </div>
+    </div>
+
+    <!-- Strong Buy & Sell extra strip (commodities, indices, forex) -->
+    <div class="featured-signals">
+        <h4 style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;"><i class="fas fa-bolt"></i> Strong signals · commodities & indices <span style="font-size:0.8rem; background:#d4e0f0; padding:0.2rem 1rem; border-radius:30px;">MVP rating</span></h4>
+        <div class="signal-grid" id="signalStrip">
+            <!-- filled by js -->
+        </div>
+    </div>
+
+    <!-- footer (mvp github structure hint) -->
+    <div class="footer-note">
+        <i class="fab fa-github"></i> <a href="#">NovaMarket MVP · github structure</a> (single‑page · html/css/js) — simulated realtime data
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ***************************
+        // SIMULATED MARKET DATA (REFRESH ON LOAD)
+        // ***************************
+
+        // ---- bitcoin dominance (random around 52-58%) ----
+        function updateBitcoinDominance() {
+            const domElem = document.getElementById('btcDomValue');
+            if (!domElem) return;
+            const base = 53.2 + (Math.random() * 5.3 - 1.8); // ~51.5 - 57.5
+            const formatted = base.toFixed(1);
+            domElem.innerHTML = formatted + '<small>%</small>';
+        }
+        updateBitcoinDominance();
+
+        // ---- ticker symbols (forex, crypto, commodities, indices) ----
+        const tickerData = [
+            { sector: 'FX', symbol: 'EUR/USD', price: 1.0876, change: 0.12 },
+            { sector: 'FX', symbol: 'GBP/JPY', price: 186.42, change: -0.34 },
+            { sector: 'CRYPTO', symbol: 'ETH', price: 3120, change: 2.45 },
+            { sector: 'CRYPTO', symbol: 'BNB', price: 512, change: -1.23 },
+            { sector: 'COMM', symbol: 'Gold', price: 2158, change: 0.45 },
+            { sector: 'COMM', symbol: 'Silver', price: 24.62, change: -0.92 },
+            { sector: 'INDICES', symbol: 'S&P500', price: 5127, change: 0.23 },
+            { sector: 'INDICES', symbol: 'DAX', price: 17985, change: -0.15 },
+            { sector: 'FX', symbol: 'USD/CHF', price: 0.903, change: 0.05 },
+            { sector: 'CRYPTO', symbol: 'SOL', price: 142.5, change: 5.32 },
+            { sector: 'COMM', symbol: 'WTI', price: 79.80, change: -0.67 },
+            { sector: 'INDICES', symbol: 'Nikkei', price: 39400, change: 0.95 },
+        ];
+
+        function renderTicker() {
+            const container = document.getElementById('tickerTape');
+            if (!container) return;
+            container.innerHTML = '';
+            tickerData.forEach(item => {
+                const changeClass = item.change >= 0 ? 'positive' : 'negative';
+                const sign = item.change >= 0 ? '+' : '';
+                const div = document.createElement('div');
+                div.className = 'ticker-item';
+                div.innerHTML = `
+                    <span class="ticker-sector">${item.sector}</span>
+                    <span class="ticker-symbol">${item.symbol}</span>
+                    <span class="ticker-price">$${typeof item.price === 'number' ? item.price.toFixed(2) : item.price}</span>
+                    <span class="ticker-change ${changeClass}">${sign}${item.change.toFixed(2)}%</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // ---- gainers & losers (with strong buy/sell classification) ----
+        // generate mock assets 
+        const assets = [
+            { name: 'Bitcoin', sym: 'BTC', price: 67250, sector: 'crypto' },
+            { name: 'Ethereum', sym: 'ETH', price: 3120, sector: 'crypto' },
+            { name: 'Cardano', sym: 'ADA', price: 0.52, sector: 'crypto' },
+            { name: 'Solana', sym: 'SOL', price: 142, sector: 'crypto' },
+            { name: 'Tesla', sym: 'TSLA', price: 172, sector: 'stock' },
+            { name: 'Nvidia', sym: 'NVDA', price: 899, sector: 'stock' },
+            { name: 'Gold', sym: 'XAU', price: 2158, sector: 'commodity' },
+            { name: 'Silver', sym: 'XAG', price: 24.6, sector: 'commodity' },
+            { name: 'S&P500', sym: 'SPX', price: 5127, sector: 'index' },
+            { name: 'Nasdaq', sym: 'NDX', price: 18250, sector: 'index' },
+            { name: 'EURUSD', sym: 'EUR', price: 1.087, sector: 'forex' },
+            { name: 'GBPUSD', sym: 'GBP', price: 1.275, sector: 'forex' },
+            { name: 'Brent', sym: 'BRENT', price: 84.5, sector: 'commodity' },
+            { name: 'Microsoft', sym: 'MSFT', price: 425, sector: 'stock' },
+        ];
+
+        // generate random 24h change for each
+        function randomChange() { return (Math.random() * 18 - 5).toFixed(2); } // -5 .. +13%
+
+        const assetsWithChange = assets.map(asset => {
+            const change = parseFloat(randomChange());
+            return { ...asset, change, price: asset.price + (asset.price * change/1000) }; // tiny adjustment
+        });
+
+        // sort gainers (descending change) and losers (ascending change)
+        const sortedByChange = [...assetsWithChange].sort((a,b) => b.change - a.change);
+        const topGainers = sortedByChange.slice(0, 5);
+        const topLosers = sortedByChange.slice(-5).reverse();  // most negative first
+
+        // function to assign strong buy / strong sell based on change & random (mvp logic)
+        function getSignal(change, sector) {
+            // Strong buy: change > 7% and sector crypto/stock ; or random spice
+            if (change >= 7.5 && (sector === 'crypto' || sector === 'stock' || sector==='commodity')) return 'STRONG BUY';
+            if (change <= -6.0) return 'STRONG SELL';
+            // additional deterministic for demo: some gainer below threshold also get "strong buy" to show variety
+            if (change > 3.5 && change < 5 && sector==='index') return 'STRONG BUY';
+            if (change < -2.5 && change > -5 && sector==='forex') return 'STRONG SELL';
+            return null;
+        }
+
+        function renderTables() {
+            const gainersEl = document.getElementById('gainersTable');
+            const losersEl = document.getElementById('losersTable');
+            if (!gainersEl || !losersEl) return;
+
+            function renderList(arr, container, isGainer) {
+                container.innerHTML = '';
+                arr.forEach((item, idx) => {
+                    const signal = getSignal(item.change, item.sector);
+                    const signalClass = signal === 'STRONG BUY' ? 'signal-strong-buy' : (signal === 'STRONG SELL' ? 'signal-strong-sell' : '');
+                    const changeClass = item.change >= 0 ? 'positive' : 'negative';
+                    const sign = item.change >= 0 ? '+' : '';
+                    const row = document.createElement('div');
+                    row.className = 'row-item';
+                    row.innerHTML = `
+                        <div class="row-left">
+                            <span class="rank">${idx+1}</span>
+                            <span class="asset-name">${item.name} <span class="asset-symbol">${item.sym}</span></span>
+                        </div>
+                        <div class="price-info">
+                            <div class="price-main">$${item.price.toFixed(2)}</div>
+                            <div class="change-pct ${changeClass}">${sign}${item.change.toFixed(2)}%</div>
+                        </div>
+                        ${signal ? `<span class="signal-tag ${signalClass}"><i class="fas fa-${signal === 'STRONG BUY' ? 'arrow-up' : 'arrow-down'}"></i> ${signal}</span>` : ''}
+                    `;
+                    container.appendChild(row);
+                });
+            }
+
+            renderList(topGainers, gainersEl, true);
+            renderList(topLosers, losersEl, false);
+        }
+
+        // extra signals for commodities/indices/forex (strip)
+        function renderSignalStrip() {
+            const strip = document.getElementById('signalStrip');
+            if (!strip) return;
+            // pick 4-5 mixed assets with strong signals
+            const candidates = assetsWithChange.filter(a => getSignal(a.change, a.sector) !== null);
+            // if not enough, create some forced
+            while (candidates.length < 4) {
+                candidates.push({ name: 'Silver', sym: 'XAG', change: 8.2, sector:'commodity', price:24.8 });
+            }
+            const selected = candidates.slice(0,5);
+            strip.innerHTML = '';
+            selected.forEach(s => {
+                const sig = getSignal(s.change, s.sector);
+                const badgeClass = sig === 'STRONG BUY' ? 'buy' : 'sell';
+                const icon = sig === 'STRONG BUY' ? 'fa-arrow-up' : 'fa-arrow-down';
+                strip.innerHTML += `
+                    <div class="signal-pill">
+                        <span><strong>${s.name} (${s.sym})</strong> <span style="color:#2b4056;">$${s.price.toFixed(1)}</span></span>
+                        <span class="badge ${badgeClass}"><i class="fas ${icon}"></i> ${sig}</span>
+                        <span class="${s.change>=0?'positive':'negative'}">${s.change>0?'+':''}${s.change.toFixed(1)}%</span>
+                    </div>
+                `;
+            });
+        }
+
+        // initial renders
+        renderTicker();
+        renderTables();
+        renderSignalStrip();
+
+        // simulate minor updates every 25 seconds (dominance & ticker flick)
+        setInterval(() => {
+            updateBitcoinDominance();
+            // optional: change a ticker price randomly (for fun)
+            const tickerContainer = document.getElementById('tickerTape');
+            if (tickerContainer && tickerContainer.children.length > 0) {
+                const randomIdx = Math.floor(Math.random() * tickerContainer.children.length);
+                const child = tickerContainer.children[randomIdx];
+                const changeSpan = child.querySelector('.ticker-change');
+                if (changeSpan) {
+                    const old = changeSpan.innerText;
+                    const newChange = (Math.random()*6 - 3).toFixed(2);
+                    changeSpan.innerText = (newChange > 0 ? '+' : '') + newChange + '%';
+                    changeSpan.className = 'ticker-change ' + (parseFloat(newChange)>=0 ? 'positive' : 'negative');
+                }
+            }
+        }, 25000);
+
+        // optional: live timestamp
+    })();
+</script>
+
+<!-- tiny extra style for better responsive -->
+<style>
+    /* ensure touch targets */
+    .ticker-item { padding: 0.6rem 0; }
+    .row-item { min-height: 52px; }
+    .badge { cursor: default; }
+    .card, .header-card { transition: background 0.2s; }
+    i.fa-bitcoin { color: #f2a900; }
+</style>
+
+<!-- MVP note: all in one page, ready for github pages -->
+</body>
+</html>
