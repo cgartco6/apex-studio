@@ -1,0 +1,38 @@
+{
+  "enterprise_name": "Apex_Digital_Core",
+  "modules": [
+    {
+      "module_name": "01_graphic_design_studio",
+      "files": [
+        {"path": "studio/vector_engine.py", "purpose": "Generates localized marketing banners, ad creatives, and high-conversion social layout assets programmaticly using Canvas/Pillow."},
+        {"path": "studio/asset_pipeline.py", "purpose": "Automates file format compilation, rendering out production-ready print PDFs, high-res PNGs, and compressed SVGs."}
+      ]
+    },
+    {
+      "module_name": "02_branding_studio",
+      "files": [
+        {"path": "studio/identity_system.py", "purpose": "Generates complete corporate identities: primary/secondary logo marks, typography rules, and functional color matrices."},
+        {"path": "studio/mockup_generator.py", "purpose": "Applies branding elements onto physical product mockups (packaging, merchandise, signage) via programmatics image layering."}
+      ]
+    },
+    {
+      "module_name": "03_financial_settlement_engine",
+      "files": [
+        {"path": "finance/gateways.py", "purpose": "Processes incoming customer checkouts. Dual-currency support using PayFast/Ozow (ZAR) and Stripe (USD/Global)."},
+        {"path": "finance/payout_automation.py", "purpose": "Handles automated out-bound vendor split-payouts and merchant settlement clearing via local banking APIs (VALR/Ozow/StandardBank NetBank patterns)."}
+      ]
+    },
+    {
+      "module_name": "04_sovereign_compliance",
+      "files": [
+        {"path": "compliance/legal_guard.py", "purpose": "Enforces strict POPIA (South Africa) record keeping, VAT calculation rules for SARS, and global GDPR data residency compliance."}
+      ]
+    },
+    {
+      "module_name": "05_reactive_commerce_engine",
+      "files": [
+        {"path": "store/cart_controller.py", "purpose": "Production-grade, server-side shopping cart managing state, multi-currency price points, and instantaneous asset delivery hooks."}
+      ]
+    }
+  ]
+}
